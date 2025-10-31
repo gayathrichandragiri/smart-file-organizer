@@ -145,6 +145,7 @@ def records():
     conn.close()
     return render_template("records.html", files=rows)
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     init_db()
+
     app.run(debug=True)
