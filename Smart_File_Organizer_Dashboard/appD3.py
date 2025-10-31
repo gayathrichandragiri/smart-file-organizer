@@ -114,15 +114,26 @@ def dashboard():
 
 
 @app.route("/organize", methods=["POST"])
+
 def organize_route():
-    dest_path = request.form.get("local_path") or (request.json.get("local_path") if request.is_json else None)
-    result = organize_files(dest_path)
-    msg = f"✅ Organized {result.get('moved', 0)} files successfully! (Mode: {result.get('mode', 'unknown')})"
+    data = request.get_json(silent=True)
+    dest_path = None
+
+  
+    if request.form.get('path'):
+        dest_path = request.form.get('path')
+    elif data and data.get('path'):
+        dest_path = data.get('path')
+
+    print(" Received folder path:", dest_path)  # Debug log
+
+    result, summary = organize_files(dest_path)
+
     if request.is_json:
         return jsonify(result)
-    flash(msg)
-    return redirect(url_for("index"))
 
+    flash(result.get('message'))
+    return render_template('success.html', message=result.get('message'), summary=summary)
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "files" not in request.files:
@@ -149,3 +160,4 @@ if __name__ == "_main_":
     init_db()
 
     app.run(debug=True)
+
